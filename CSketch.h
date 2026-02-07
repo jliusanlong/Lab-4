@@ -17,5 +17,8 @@ public:
 private:
 
 	cv::Point2f _joystick;
-	cv::Point2f _position= (250,250);
+	cv::Point _position;
+	cv::Point _previousPosition;
+
+	
 };

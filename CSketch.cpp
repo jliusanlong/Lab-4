@@ -8,10 +8,15 @@ CSketch::CSketch(int comport, int rows, int cols)
 {
 	_control.init_com(comport);
 	_canvas = cv::Mat::zeros(rows, cols, CV_8UC3);
+
+	_position = cv::Point(375, 375);        // x = cols/2, y = rows/2
+	_previousPosition = cv::Point(375, 375);
+
+
 	cvui::init("Etch-A-Sketch");
 	cv::namedWindow("Etch-A-Sketch", cv::WINDOW_AUTOSIZE);
 
-	cvui::window(_canvas, 10, 10, 200, 40, "Etch-A-Sketch");
+
 	
 }
 	
@@ -27,12 +32,20 @@ void CSketch::run()
 		CSketch::update();
 		CSketch::draw();
 
-
 		
-		if (cvui::button(_canvas, 10, 10, "EXIT"))
+		
+		if (cvui::button(_canvas, 20, 40, "EXIT"))
 		{
 			cv::destroyWindow("Etch-A-Sketch");
 			break;
+		}
+
+		if(cvui::button(_canvas, 90, 40, "RESET"))
+		{
+			_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
+			_position = cv::Point(375, 375);      // Reset position
+			_previousPosition = cv::Point(375, 375);
+			
 		}
 		
 		int key = cv::waitKey(1) & 0xFF;
@@ -57,6 +70,9 @@ void CSketch::update()
 	_joystick.y -= 50;
 	_joystick.y *= -1;
 
+	_previousPosition = _position;
+
+	//Stabalize at origin
 	if (_joystick.x > 2 || _joystick.x < -2)
 	{
 		_position.x += _joystick.x / 10;
@@ -69,6 +85,24 @@ void CSketch::update()
 	}
 
 
+	//Boundary
+	if(_position.x>=750)
+	{
+		_position.x = 749;
+	}
+	else if(_position.x<=0)
+	{
+		_position.x = 0;
+	}
+	if(_position.y>=750)
+	{
+		_position.y = 748;
+	}
+	else if(_position.y<=0)
+	{
+		_position.y = 1;
+	}
+
 	
 
 
@@ -80,14 +114,15 @@ void CSketch::draw()
 {
 	
 
-	_canvas.setTo(cv::Scalar(0, 0, 0));
+	
 
 	
 
-	cv::circle(_canvas, cv::Point(_position.x, _position.y), 6, cv::Scalar(0, 255, 0), cv::FILLED);
+	cv::line(_canvas, _previousPosition, _position, cv::Scalar(0, 255, 0), 2);
 
-	cvui::window(_canvas, 10, 10, 200, 150, "Etch-A-Sketch");
-	cvui::button(_canvas, 50, 50, "EXIT");
+	cvui::window(_canvas, 10, 10, 175, 75, "Etch-A-Sketch");
+	cvui::button(_canvas, 20, 40, "EXIT");
+	cvui::button(_canvas, 90, 40, "RESET");
 
 	cv::imshow("Etch-A-Sketch", _canvas);
 }
