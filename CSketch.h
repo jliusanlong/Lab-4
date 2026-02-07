@@ -16,7 +16,6 @@ public:
 
 private:
 
-	//. something
-	float _X_joystick;
-	float _Y_joystick;
+	cv::Point2f _joystick;
+	cv::Point2f _position= (250,250);
 };
