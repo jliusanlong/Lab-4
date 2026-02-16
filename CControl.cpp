@@ -97,6 +97,7 @@ void CControl::get_data(int type, int channel, int& result)
 bool CControl::set_data(int type, int channel, int val)
 {
 	//_com.flush();
+    _com.clear_rx();
 	std::string tx_str1 = "S " + std::to_string(type) + " " + std::to_string(channel) + " " + std::to_string(val) + "\n";;
     // Send TX string
     _com.write(tx_str1.c_str(), tx_str1.length());

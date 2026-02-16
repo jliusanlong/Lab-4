@@ -16,6 +16,13 @@ CSketch::CSketch(int comport, int rows, int cols)
 	cvui::init("Etch-A-Sketch");
 	cv::namedWindow("Etch-A-Sketch", cv::WINDOW_AUTOSIZE);
 
+	for (int i = 0; i <= (_colors.size()-1); i++)
+	{
+		_control.set_data(0, _LED_colors[i], 0);
+	}
+
+	_control.set_data(0, _LED_colors[_colorIndex], 1);
+
 
 	
 }
@@ -71,6 +78,8 @@ void CSketch::gpio()
 	_button_A = _control.get_button(33);
 	
 	_button_B = _control.get_button(32);
+
+
 	
 
 
@@ -129,6 +138,11 @@ void CSketch::update()
 	if (_button_B == true)
 	{
 		_colorIndex = (_colorIndex + 1) % _colors.size();	
+		_previous_colorIndex = (_colorIndex - 1 + _colors.size()) % _colors.size();
+
+		_control.set_data(0, _LED_colors[_colorIndex], 1);
+		_control.set_data(0, _LED_colors[_previous_colorIndex], 0);
+
 	}
 	////////////////////////////////////
 		

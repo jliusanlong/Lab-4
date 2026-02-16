@@ -26,14 +26,17 @@ private:
 	int _button_A, _button_B;
 	int _change;
 
+	const std::array<int, 3> _LED_colors = { 39, 38, 37 };
 
-	const std::array<cv::Scalar, 3> _colors = {
+	const std::array<cv::Scalar, 3> _colors = 
+	{
 	cv::Scalar(0,   0,   255), // red    (B,G,R)
 	cv::Scalar(0,   255, 0),   // green
 	cv::Scalar(255, 0,   0),   // blue
 	};
 
 	std::size_t _colorIndex = 0;
+	std::size_t _previous_colorIndex;
 
 };
 	
