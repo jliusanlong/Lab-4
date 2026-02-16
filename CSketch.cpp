@@ -29,6 +29,7 @@ void CSketch::run()
 	while (true)
 	{
 		CSketch::gpio();
+		
 		CSketch::update();
 		CSketch::draw();
 
@@ -40,6 +41,8 @@ void CSketch::run()
 			break;
 		}
 
+
+		///GUI button. Why gets triggered when hovered over, after clicking it once?
 		if(cvui::button(_canvas, 90, 40, "RESET"))
 		{
 			_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
@@ -54,16 +57,29 @@ void CSketch::run()
 			cv::destroyWindow("Etch-A-Sketch");
 			break;
 		}
-		
+		///////////////////////////////////////////////////////
 	}
 }
 
 void CSketch::gpio()
 {
-	_joystick.x = _control.get_analog(1, 26);
-	_joystick.y = _control.get_analog(1, 2);
+
+	
+	_joystick.x = _control.get_analog(1, 2);
+	_joystick.y = _control.get_analog(1, 26);
+
+	_button_A = _control.get_button(33);
+	
+	_button_B = _control.get_button(32);
+	
+
 
 }
+
+
+
+
+
 void CSketch::update()
 {
 	_joystick.x -= 50;
@@ -76,14 +92,12 @@ void CSketch::update()
 	if (_joystick.x > 2 || _joystick.x < -2)
 	{
 		_position.x += _joystick.x / 10;
-
 	}
 
 	if (_joystick.y > 2 || _joystick.y <-2)
 	{
 		_position.y += _joystick.y / 10;
 	}
-
 
 	//Boundary
 	if(_position.x>=750)
@@ -103,9 +117,22 @@ void CSketch::update()
 		_position.y = 1;
 	}
 
+	////////////////////////////////////
+	if (_button_A== true)
+	{
+		_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
+		_position = cv::Point(375, 375);      // Reset position
+		_previousPosition = cv::Point(375, 375);
+
+	}
+
+	if (_button_B == true)
+	{
+		_colorIndex = (_colorIndex + 1) % _colors.size();	
+	}
+	////////////////////////////////////
+		
 	
-
-
 	
 }
 
@@ -118,7 +145,7 @@ void CSketch::draw()
 
 	
 
-	cv::line(_canvas, _previousPosition, _position, cv::Scalar(0, 255, 0), 2);
+	cv::line(_canvas, _previousPosition, _position, _colors[_colorIndex], 2);
 
 	cvui::window(_canvas, 10, 10, 175, 75, "Etch-A-Sketch");
 	cvui::button(_canvas, 20, 40, "EXIT");

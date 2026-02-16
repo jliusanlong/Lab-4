@@ -114,7 +114,7 @@ int Serial::read(char *buffer, int buffLen)
 
 	return numRead;
 }
-
+/*
 void Serial::flush()
 {
 	char buffer[FLUSH_BUFFSIZE];
@@ -123,4 +123,22 @@ void Serial::flush()
 	{
 		numBytes = read(buffer, FLUSH_BUFFSIZE);
 	}
+}
+*/
+
+void Serial::flush_bounded(int max_ms)
+{
+	char buffer[FLUSH_BUFFSIZE];
+	auto start = GetTickCount64();
+
+	while (GetTickCount64() - start < (DWORD)max_ms)
+	{
+		int n = read(buffer, FLUSH_BUFFSIZE);
+		if (n <= 0) break;
+	}
+}
+
+void Serial::clear_rx()
+{
+	PurgeComm(commHandle, PURGE_RXCLEAR);
 }

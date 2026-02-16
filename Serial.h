@@ -52,4 +52,9 @@ public:
 
 	// Flushes everything from the serial port's read buffer
 	void flush();
+
+	void flush_bounded(int max_ms);
+
+	void clear_rx();
+
 };

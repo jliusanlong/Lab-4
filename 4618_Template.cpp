@@ -405,7 +405,7 @@ void lab3()
         case 'b':
             do 
             {
-                control.get_button();           
+                control.get_button(32);           
 			} while (true);
 
             break;

@@ -1,8 +1,9 @@
-
 #include "stdafx.h"
 #include "CControl.h"
 #include <chrono>
 #include <cstdint>
+#include <windows.h>    
+#include <opencv2/core.hpp> 
 
 
 
@@ -21,6 +22,24 @@ CControl::~CControl()
 int last_number(std::string s)
 {
     return std::stoi(s.substr(s.find_last_of(' ') + 1));
+
+
+}
+
+int last_number_from_line(const std::string& s)
+{
+    std::stringstream ss(s);
+    std::string token, last;
+
+    while (ss >> token) {
+        last = token;              // ends up as the last whitespace-separated piece
+    }
+
+    if (last.empty()) {
+        throw std::runtime_error("No tokens in string");
+    }
+
+    return std::stoi(last);        // convert last token to int
 }
 
 //Chat generated millis function
@@ -34,27 +53,28 @@ std::uint64_t millis()
 }
 
 
-void::CControl::init_com(int comport)
+void CControl::init_com(int comport)
 {
 	std::string port_name = "COM" + std::to_string(comport);
 	_com.open(port_name, 115200);
 
 }
 
-bool CControl::get_data(int type, int channel, int& result)
-{
-	std::string tx_str = "G " + std::to_string(type) + " " + std::to_string(channel);
+void CControl::get_data(int type, int channel, int& result)
+{ 
+	//_com.flush_bounded(1);
+	std::string tx_str = "G " + std::to_string(type) + " " + std::to_string(channel) + "\n";
 	std::string rx_str;
     char buff[2];
 
-	    //_com.flush();
+	    _com.clear_rx();
         // Send TX string
         _com.write(tx_str.c_str(), tx_str.length());
-       // Sleep(1); // wait for ADC conversion, etc. May not be needed?
+        //Sleep(1); // wait for ADC conversion, etc. May not be needed?
 
         rx_str = "";
         // start timeout count
-        double start_time = cv::getTickCount();
+        int64_t start_time = cv::getTickCount();
 
         buff[0] = 0;
         // Read 1 byte and if an End Of Line then exit loop
@@ -67,15 +87,16 @@ bool CControl::get_data(int type, int channel, int& result)
             }
         }
       
-		result = last_number(rx_str);
-
-        return true;
+		result = last_number_from_line(rx_str);
+        
+        
+        //return true;
 
 }
 
 bool CControl::set_data(int type, int channel, int val)
 {
-	_com.flush();
+	//_com.flush();
 	std::string tx_str1 = "S " + std::to_string(type) + " " + std::to_string(channel) + " " + std::to_string(val) + "\n";;
     // Send TX string
     _com.write(tx_str1.c_str(), tx_str1.length());
@@ -83,7 +104,7 @@ bool CControl::set_data(int type, int channel, int val)
 
 }
 
-bool CControl::get_button (void)
+bool CControl::get_button (int channel)
 {
         std::uint64_t current_time = millis();
 
@@ -94,18 +115,17 @@ bool CControl::get_button (void)
 
         if (current_time - previous_time > debounce_time)
         {
-            get_data(0, 33, value);
+            get_data(0, channel, value);
 
             if (value == 0)
             {
-                button_count++;
-                std::cout << "BUTTON TEST: " << button_count << "\n";
+	
                 previous_time = current_time;
                 return true;
             }
         }
-        else
-            return false;
+        
+        return false;
    
 }
 
@@ -115,6 +135,7 @@ float CControl::get_analog(int type, int channel)
     int value;
     
     CControl::get_data(type, channel, value);
+	
                
 
     percent = (value / 4096.0f) * 100.0f;

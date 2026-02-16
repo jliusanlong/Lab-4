@@ -41,7 +41,7 @@ public:
 	* @param result Reference to store the retrieved data
 	* 
 	*/
-	bool get_data(int type, int channel, int& result);
+	void get_data(int type, int channel, int& result);
 
 	/**@brief Sends data to the microcontroller
 	* 
@@ -54,6 +54,6 @@ public:
 
 	float get_analog(int type, int channel);
 
-	bool get_button(void);
+	bool get_button(int channel);
 
 };
