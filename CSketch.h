@@ -22,6 +22,10 @@ private:
 	cv::Point2f _joystick;
 	cv::Point _position;
 	cv::Point _previousPosition;
+
+	cv::Point3i _accelerometer;
+	cv::Point3i _previous_accelerometer;
+
 	int value;
 	int _button_A, _button_B;
 	int _change;

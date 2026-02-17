@@ -360,12 +360,12 @@ void lab3()
         case 'a':
             do 
             {
-                X_percentage = control.get_analog(ANALOG, 26);
-                Y_percetnage = control.get_analog(ANALOG, 2);
+                X_percentage = control.get_analog(ANALOG, 2);
+                Y_percetnage = control.get_analog(ANALOG, 26);
 
-				control.get_data(ANALOG, 26, value);
+				control.get_data(ANALOG, 24, value);
 				X_value = value;
-                control.get_data(ANALOG, 2, value);
+                control.get_data(ANALOG, 26, value);
 				Y_value = value;
 
 				std::cout << "ANALOG TEST: CH26 X = " << X_value << " (" 
