@@ -75,19 +75,20 @@ void CSketch::gpio()
 	_joystick.x = _control.get_analog(1, 2);
 	_joystick.y = _control.get_analog(1, 26);
 
-	_button_A = _control.get_button(33);
-	
-	_button_B = _control.get_button(32);
-
-	_control.get_data(1, 23, value);
-	_accelerometer.x = value;
-
 	_control.get_data(1, 24, value);
 	_accelerometer.y = value;
 
+	_button_A = _control.get_button(33);
+	
+	_button_B = _control.get_button(32);
+	/*
+	_control.get_data(1, 23, value);
+	_accelerometer.x = value;
+	
+	
 	_control.get_data(1, 25, value);
 	_accelerometer.z = value;
-
+	*/
 	
 
 
@@ -153,20 +154,20 @@ void CSketch::update()
 
 	}
 	////////////////////////////////////
-
 	
-	if (_accelerometer.x- _previous_accelerometer.x > 300 || _accelerometer.x - _previous_accelerometer.x < -300 ||
-		_accelerometer.y - _previous_accelerometer.y > 1500 || _accelerometer.y - _previous_accelerometer.y < -1500 ||
-		_accelerometer.z - _previous_accelerometer.z > 1600 || _accelerometer.z - _previous_accelerometer.z < -1600)
+	
+	if (/*_accelerometer.x- _previous_accelerometer.x > 400 || _accelerometer.x - _previous_accelerometer.x < -400 ||*/
+		_accelerometer.y - _previous_accelerometer.y > 1600 || _accelerometer.y - _previous_accelerometer.y < -1600 
+		/*_accelerometer.z - _previous_accelerometer.z > 1700 || _accelerometer.z - _previous_accelerometer.z < -1700*/)
 	{
 		_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
 		_position = cv::Point(375, 375);      // Reset position
 		_previousPosition = cv::Point(375, 375);
 		
 	}
-	_previous_accelerometer.x = _accelerometer.x;
+	//_previous_accelerometer.x = _accelerometer.x;
 	_previous_accelerometer.y = _accelerometer.y;
-	_previous_accelerometer.z = _accelerometer.z;
+	//_previous_accelerometer.z = _accelerometer.z;
 		
 	
 	
