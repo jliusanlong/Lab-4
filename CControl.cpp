@@ -5,27 +5,15 @@
 #include <windows.h>    
 #include <opencv2/core.hpp> 
 
-
-
-
 CControl::CControl()
 {
-
 }
 
 CControl::~CControl()
 {
-
 }
 
 //Chat
-int last_number(std::string s)
-{
-    return std::stoi(s.substr(s.find_last_of(' ') + 1));
-
-
-}
-
 int last_number_from_line(const std::string& s)
 {
     std::stringstream ss(s);
@@ -52,7 +40,6 @@ std::uint64_t millis()
     return (std::uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
 }
 
-
 void CControl::init_com(int comport)
 {
 	std::string port_name = "COM" + std::to_string(comport);
@@ -60,16 +47,18 @@ void CControl::init_com(int comport)
 
 }
 
-void CControl::get_data(int type, int channel, int& result)
+bool CControl::get_data(int type, int channel, int& result)
 { 
-	//_com.flush_bounded(1);
 	std::string tx_str = "G " + std::to_string(type) + " " + std::to_string(channel) + "\n";
 	std::string rx_str;
     char buff[2];
 
 	    _com.clear_rx();
+
         // Send TX string
         _com.write(tx_str.c_str(), tx_str.length());
+
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
         //Sleep(1); // wait for ADC conversion, etc. May not be needed?
 
         rx_str = "";
@@ -78,8 +67,8 @@ void CControl::get_data(int type, int channel, int& result)
 
         buff[0] = 0;
         // Read 1 byte and if an End Of Line then exit loop
-    // Timeout after 1 second, if debugging step by step this will cause you to exit the loop
-        while (buff[0] != '\n')// && (cv::getTickCount() - start_time) / cv::getTickFrequency() < 1.0)
+        // Timeout after 1 second, if debugging step by step this will cause you to exit the loop
+        while ((buff[0] != '\n') && (cv::getTickCount() - start_time) / cv::getTickFrequency() < 1.0)
         {
             if (_com.read(buff, 1) > 0)
             {
@@ -89,20 +78,15 @@ void CControl::get_data(int type, int channel, int& result)
       
 		result = last_number_from_line(rx_str);
         
-        
-        //return true;
-
+        return true;
 }
 
 bool CControl::set_data(int type, int channel, int val)
 {
-	//_com.flush();
-    _com.clear_rx();
 	std::string tx_str1 = "S " + std::to_string(type) + " " + std::to_string(channel) + " " + std::to_string(val) + "\n";;
     // Send TX string
     _com.write(tx_str1.c_str(), tx_str1.length());
     return true;
-
 }
 
 bool CControl::get_button (int channel)
@@ -137,13 +121,9 @@ float CControl::get_analog(int type, int channel)
     
     CControl::get_data(type, channel, value);
 	
-               
-
     percent = (value / 4096.0f) * 100.0f;
-
-
+    
     return percent;
-
 
 }
 

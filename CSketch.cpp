@@ -2,8 +2,6 @@
 #include "CSketch.h"
 #include "cvui.h"
 
-
-
 CSketch::CSketch(int comport, int rows, int cols)
 {
 	_control.init_com(comport);
@@ -11,7 +9,6 @@ CSketch::CSketch(int comport, int rows, int cols)
 
 	_position = cv::Point(375, 375);        // x = cols/2, y = rows/2
 	_previousPosition = cv::Point(375, 375);
-
 
 	cvui::init("Etch-A-Sketch");
 	cv::namedWindow("Etch-A-Sketch", cv::WINDOW_AUTOSIZE);
@@ -21,10 +18,7 @@ CSketch::CSketch(int comport, int rows, int cols)
 		_control.set_data(0, _LED_colors[i], 0);
 	}
 
-	_control.set_data(0, _LED_colors[_colorIndex], 1);
-
-
-	
+	_control.set_data(0, _LED_colors[_colorIndex], 1);	
 }
 	
 CSketch::~CSketch()
@@ -36,67 +30,29 @@ void CSketch::run()
 	while (true)
 	{
 		CSketch::gpio();
-		
 		CSketch::update();
 		CSketch::draw();
 
-		
-		
-		if (cvui::button(_canvas, 20, 40, "EXIT"))
-		{
-			cv::destroyWindow("Etch-A-Sketch");
-			break;
-		}
-
-
-		///GUI button. Why gets triggered when hovered over, after clicking it once?
-		if(cvui::button(_canvas, 90, 40, "RESET"))
-		{
-			_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
-			_position = cv::Point(375, 375);      // Reset position
-			_previousPosition = cv::Point(375, 375);
-			
-		}
-		
 		int key = cv::waitKey(1) & 0xFF;
-		if (key == 'q' || key == 'Q')
+		if (key == 'q' || key == 'Q' || _exit_clicked)
 		{
 			cv::destroyWindow("Etch-A-Sketch");
 			break;
 		}
-		///////////////////////////////////////////////////////
 	}
 }
 
 void CSketch::gpio()
 {
-
-	
 	_joystick.x = _control.get_analog(1, 2);
 	_joystick.y = _control.get_analog(1, 26);
 
 	_control.get_data(1, 24, value);
-	_accelerometer.y = value;
+	_accelerometer = value;
 
 	_button_A = _control.get_button(33);
-	
 	_button_B = _control.get_button(32);
-	/*
-	_control.get_data(1, 23, value);
-	_accelerometer.x = value;
-	
-	
-	_control.get_data(1, 25, value);
-	_accelerometer.z = value;
-	*/
-	
-
-
 }
-
-
-
-
 
 void CSketch::update()
 {
@@ -109,12 +65,12 @@ void CSketch::update()
 	//Stabalize at origin
 	if (_joystick.x > 2 || _joystick.x < -2)
 	{
-		_position.x += _joystick.x / 5;
+		_position.x += _joystick.x / 4;
 	}
 
 	if (_joystick.y > 2 || _joystick.y <-2)
 	{
-		_position.y += _joystick.y / 5;
+		_position.y += _joystick.y / 4;
 	}
 
 	//Boundary
@@ -141,7 +97,6 @@ void CSketch::update()
 		_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
 		_position = cv::Point(375, 375);      // Reset position
 		_previousPosition = cv::Point(375, 375);
-
 	}
 
 	if (_button_B == true)
@@ -151,42 +106,35 @@ void CSketch::update()
 
 		_control.set_data(0, _LED_colors[_colorIndex], 1);
 		_control.set_data(0, _LED_colors[_previous_colorIndex], 0);
-
 	}
 	////////////////////////////////////
 	
-	
-	if (/*_accelerometer.x- _previous_accelerometer.x > 400 || _accelerometer.x - _previous_accelerometer.x < -400 ||*/
-		_accelerometer.y - _previous_accelerometer.y > 1600 || _accelerometer.y - _previous_accelerometer.y < -1600 
-		/*_accelerometer.z - _previous_accelerometer.z > 1700 || _accelerometer.z - _previous_accelerometer.z < -1700*/)
+	if (_accelerometer - _previous_accelerometer > 1600 || _accelerometer - _previous_accelerometer < -1600 )
 	{
 		_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
 		_position = cv::Point(375, 375);      // Reset position
 		_previousPosition = cv::Point(375, 375);
-		
 	}
-	//_previous_accelerometer.x = _accelerometer.x;
-	_previous_accelerometer.y = _accelerometer.y;
-	//_previous_accelerometer.z = _accelerometer.z;
-		
-	
+	_previous_accelerometer = _accelerometer;
 	
 }
 
 
 void CSketch::draw()
 {
-	
-
-	
-
-	
+	cvui::window(_canvas, 10, 10, 175, 75, "Etch-A-Sketch");
+	_exit_clicked = cvui::button(_canvas, 20, 40, "EXIT");
+	_reset = cvui::button(_canvas, 90, 40, "RESET");
+	if (_reset)
+	{
+		_canvas.setTo(cv::Scalar(0, 0, 0));  // Clear the canvas
+		_position = cv::Point(375, 375);      // Reset position
+		_previousPosition = cv::Point(375, 375);
+	}
 
 	cv::line(_canvas, _previousPosition, _position, _colors[_colorIndex], 2);
 
-	cvui::window(_canvas, 10, 10, 175, 75, "Etch-A-Sketch");
-	cvui::button(_canvas, 20, 40, "EXIT");
-	cvui::button(_canvas, 90, 40, "RESET");
+	cvui::update();
 
 	cv::imshow("Etch-A-Sketch", _canvas);
 }
